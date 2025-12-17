@@ -1,0 +1,16 @@
+{
+  "name": "lxai-archiver",
+  "version": "1.0.0",
+  "description": "Static site archiver for lisbonai.xyz",
+  "type": "module",
+  "scripts": {
+    "archive": "node crawler.js",
+    "test": "node test-crawler.js"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
