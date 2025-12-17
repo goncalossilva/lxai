@@ -105,8 +105,11 @@ async function testCrawler() {
           return path.slice(1) + 'index.html';
         }
         
-        const ext = path.split('.').pop();
-        if (!path.includes('.') || ext.length > 5) {
+        // Use proper extension detection
+        const ext = path.substring(path.lastIndexOf('.') + 1);
+        const hasExtension = path.lastIndexOf('.') > path.lastIndexOf('/');
+        
+        if (!hasExtension) {
           return path.slice(1) + '/index.html';
         }
         
