@@ -131,7 +131,8 @@ class StaticSiteArchiver {
             const currentLocalPath = this.getLocalPath(currentUrl);
             const currentDir = dirname(currentLocalPath);
             const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
-            return `href="${relativePath}"`;
+            // Fix Windows-style paths for web
+            return `href="${relativePath.replace(/\\/g, '/')}"`;
           }
         }
         // External link - keep as-is
@@ -154,11 +155,45 @@ class StaticSiteArchiver {
             const currentLocalPath = this.getLocalPath(currentUrl);
             const currentDir = dirname(currentLocalPath);
             const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
-            return `src="${relativePath}"`;
+            // Fix Windows-style paths for web
+            return `src="${relativePath.replace(/\\/g, '/')}"`;
           }
         }
         // External asset - keep as-is
         return match;
+      } catch {
+        return match;
+      }
+    });
+
+    // Rewrite srcset attributes for responsive images
+    const srcsetRegex = /srcset=["']([^"']+)["']/g;
+    rewritten = rewritten.replace(srcsetRegex, (match, srcset) => {
+      try {
+        const entries = srcset.split(',').map(entry => {
+          const parts = entry.trim().split(/\s+/);
+          if (parts.length === 0) return entry;
+          
+          const url = parts[0];
+          const descriptor = parts.slice(1).join(' ');
+          
+          try {
+            const absoluteUrl = new URL(url, currentUrl).href;
+            if (this.isTargetDomain(absoluteUrl)) {
+              const localPath = this.getLocalPath(absoluteUrl);
+              if (localPath) {
+                const currentLocalPath = this.getLocalPath(currentUrl);
+                const currentDir = dirname(currentLocalPath);
+                const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
+                return descriptor ? `${relativePath.replace(/\\/g, '/')} ${descriptor}` : relativePath.replace(/\\/g, '/');
+              }
+            }
+            return entry;
+          } catch {
+            return entry;
+          }
+        });
+        return `srcset="${entries.join(', ')}"`;
       } catch {
         return match;
       }
@@ -254,6 +289,51 @@ class StaticSiteArchiver {
           const localPath = this.getLocalPath(imgUrl);
           if (localPath) {
             await this.downloadAsset(imgUrl, localPath);
+          }
+        }
+      }
+
+      // Download srcset images
+      const srcsetUrls = await page.evaluate(() => {
+        const images = Array.from(document.querySelectorAll('img[srcset]'));
+        const urls = [];
+        images.forEach(img => {
+          const srcset = img.getAttribute('srcset');
+          if (srcset) {
+            srcset.split(',').forEach(entry => {
+              const url = entry.trim().split(/\s+/)[0];
+              if (url) urls.push(url);
+            });
+          }
+        });
+        return urls;
+      });
+
+      for (const srcsetUrl of srcsetUrls) {
+        try {
+          const absoluteUrl = new URL(srcsetUrl, url).href;
+          if (this.isTargetDomain(absoluteUrl)) {
+            const localPath = this.getLocalPath(absoluteUrl);
+            if (localPath) {
+              await this.downloadAsset(absoluteUrl, localPath);
+            }
+          }
+        } catch (error) {
+          // Ignore invalid URLs
+        }
+      }
+
+      // Download fonts
+      const fontUrls = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('link[rel~="preload"][as="font"]'));
+        return links.map(link => link.href);
+      });
+
+      for (const fontUrl of fontUrls) {
+        if (this.isTargetDomain(fontUrl)) {
+          const localPath = this.getLocalPath(fontUrl);
+          if (localPath) {
+            await this.downloadAsset(fontUrl, localPath);
           }
         }
       }
