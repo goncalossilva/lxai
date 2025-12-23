@@ -3,6 +3,7 @@ import { mkdir, writeFile, readFile } from 'fs/promises';
 import { join, dirname, relative } from 'path';
 
 // Simple test to validate the crawler logic without external network access
+const TARGET_DOMAIN = 'lisbonai.xyz';
 
 async function testCrawler() {
   console.log('Testing crawler functionality...\n');
@@ -64,7 +65,7 @@ async function testCrawler() {
     const isTargetDomain = (url) => {
       try {
         const urlObj = new URL(url);
-        return urlObj.hostname === 'lisbonai.xyz';
+        return urlObj.hostname === TARGET_DOMAIN;
       } catch {
         return false;
       }
@@ -120,10 +121,10 @@ async function testCrawler() {
     };
     
     const pathTests = [
-      { url: 'https://lisbonai.xyz/', expected: 'index.html' },
-      { url: 'https://lisbonai.xyz/about', expected: 'about/index.html' },
-      { url: 'https://lisbonai.xyz/style.css', expected: 'style.css' },
-      { url: 'https://lisbonai.xyz/images/logo.png', expected: 'images/logo.png' },
+      { url: `https://${TARGET_DOMAIN}/`, expected: 'index.html' },
+      { url: `https://${TARGET_DOMAIN}/about`, expected: 'about/index.html' },
+      { url: `https://${TARGET_DOMAIN}/style.css`, expected: 'style.css' },
+      { url: `https://${TARGET_DOMAIN}/images/logo.png`, expected: 'images/logo.png' },
     ];
     
     allPassed = true;
@@ -139,8 +140,42 @@ async function testCrawler() {
       console.log('  All path generation tests passed\n');
     }
 
-    // Test 7: Save test file
-    console.log('✓ Test 7: Testing file operations...');
+    // Test 7: Asset path generation (including external hosts)
+    console.log('✓ Test 7: Testing asset path generation...');
+    const getAssetLocalPath = (url) => {
+      const basePath = getLocalPath(url);
+      if (!basePath) return null;
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === TARGET_DOMAIN) {
+          return basePath;
+        }
+        return join('external', urlObj.hostname, basePath);
+      } catch {
+        return null;
+      }
+    };
+
+    const assetPathTests = [
+      { url: `https://${TARGET_DOMAIN}/images/logo.png`, expected: 'images/logo.png' },
+      { url: 'https://framerusercontent.com/assets/logo.png', expected: join('external', 'framerusercontent.com', 'assets/logo.png') },
+    ];
+
+    allPassed = true;
+    for (const test of assetPathTests) {
+      const result = getAssetLocalPath(test.url);
+      const pass = result === test.expected;
+      if (!pass) {
+        console.log(`  FAIL: ${test.url} - expected ${test.expected}, got ${result}`);
+        allPassed = false;
+      }
+    }
+    if (allPassed) {
+      console.log('  All asset path generation tests passed\n');
+    }
+
+    // Test 8: Save test file
+    console.log('✓ Test 8: Testing file operations...');
     await writeFile(join(testDir, 'output.html'), '<html><body>Output Test</body></html>');
     const saved = await readFile(join(testDir, 'output.html'), 'utf-8');
     if (saved.includes('Output Test')) {

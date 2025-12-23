@@ -8,6 +8,13 @@ import { pipeline } from 'stream/promises';
 const TARGET_DOMAIN = 'lisbonai.xyz';
 const START_URL = `https://${TARGET_DOMAIN}`;
 const OUTPUT_DIR = './output';
+const ASSET_EXTENSIONS = new Set([
+  '.css', '.js', '.mjs', '.json',
+  '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif', '.ico',
+  '.woff', '.woff2', '.ttf', '.otf', '.eot',
+  '.mp4', '.webm'
+]);
+const isHttpProtocol = (urlObj) => ['http:', 'https:'].includes(urlObj.protocol);
 
 class StaticSiteArchiver {
   constructor() {
@@ -83,7 +90,72 @@ class StaticSiteArchiver {
     }
   }
 
+  getAssetLocalPath(url) {
+    try {
+      const basePath = this.getLocalPath(url);
+      if (!basePath) return null;
+
+      const urlObj = new URL(url);
+      if (this.isTargetDomain(url)) {
+        return basePath;
+      }
+
+      return join('external', urlObj.hostname, basePath);
+    } catch {
+      return null;
+    }
+  }
+
+  getRelativePath(currentUrl, targetLocalPath) {
+    const currentLocalPath = this.getLocalPath(currentUrl);
+    if (!currentLocalPath) {
+      return targetLocalPath.replace(/\\/g, '/');
+    }
+
+    const currentDir = dirname(currentLocalPath);
+    const relativePath = currentDir === '.' ? targetLocalPath : relative(currentDir, targetLocalPath);
+    return relativePath.replace(/\\/g, '/');
+  }
+
+  resolveHttpUrl(url, baseUrl) {
+    try {
+      const absoluteUrl = new URL(url, baseUrl).href;
+      const urlObj = new URL(absoluteUrl);
+      if (!isHttpProtocol(urlObj)) return null;
+      return { absoluteUrl, urlObj };
+    } catch {
+      return null;
+    }
+  }
+
+  isAssetUrl(urlObj) {
+    const ext = extname(urlObj.pathname).toLowerCase();
+    return ASSET_EXTENSIONS.has(ext);
+  }
+
+  async downloadHttpAsset(url, baseUrl, { logLabel, requireAssetExtension = false } = {}) {
+    const resolved = this.resolveHttpUrl(url, baseUrl);
+    if (!resolved) {
+      if (logLabel) {
+        console.warn(`  Skipping invalid ${logLabel} URL: ${url}`);
+      }
+      return;
+    }
+
+    if (requireAssetExtension && !this.isAssetUrl(resolved.urlObj)) return;
+
+    const localPath = this.getAssetLocalPath(resolved.absoluteUrl);
+    if (localPath) {
+      await this.downloadAsset(resolved.absoluteUrl, localPath);
+    }
+  }
+
   async downloadAsset(url, localPath) {
+    if (!localPath) {
+      console.warn(`  Skipping asset without resolved local path: ${url}`);
+      return null;
+    }
+
     if (this.assets.has(url)) {
       return this.assets.get(url);
     }
@@ -128,11 +200,17 @@ class StaticSiteArchiver {
           // Internal link - rewrite to local path
           const localPath = this.getLocalPath(normalized);
           if (localPath) {
-            const currentLocalPath = this.getLocalPath(currentUrl);
-            const currentDir = dirname(currentLocalPath);
-            const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
-            // Fix Windows-style paths for web
-            return `href="${relativePath.replace(/\\/g, '/')}"`;
+            const relativePath = this.getRelativePath(currentUrl, localPath);
+            return `href="${relativePath}"`;
+          }
+        }
+
+        const resolved = this.resolveHttpUrl(url, currentUrl);
+        if (resolved && this.isAssetUrl(resolved.urlObj)) {
+          const assetLocalPath = this.getAssetLocalPath(resolved.absoluteUrl);
+          if (assetLocalPath) {
+            const relativePath = this.getRelativePath(currentUrl, assetLocalPath);
+            return `href="${relativePath}"`;
           }
         }
         // External link - keep as-is
@@ -146,18 +224,15 @@ class StaticSiteArchiver {
     const srcRegex = /src=["']([^"']+)["']/g;
     rewritten = rewritten.replace(srcRegex, (match, url) => {
       try {
-        const absoluteUrl = new URL(url, currentUrl).href;
-        
-        if (this.isTargetDomain(absoluteUrl)) {
-          // Internal asset
-          const localPath = this.getLocalPath(absoluteUrl);
-          if (localPath) {
-            const currentLocalPath = this.getLocalPath(currentUrl);
-            const currentDir = dirname(currentLocalPath);
-            const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
-            // Fix Windows-style paths for web
-            return `src="${relativePath.replace(/\\/g, '/')}"`;
-          }
+        const resolved = this.resolveHttpUrl(url, currentUrl);
+        if (!resolved) {
+          return match;
+        }
+
+        const localPath = this.getAssetLocalPath(resolved.absoluteUrl);
+        if (localPath) {
+          const relativePath = this.getRelativePath(currentUrl, localPath);
+          return `src="${relativePath}"`;
         }
         // External asset - keep as-is
         return match;
@@ -178,15 +253,15 @@ class StaticSiteArchiver {
           const descriptor = parts.slice(1).join(' ');
           
           try {
-            const absoluteUrl = new URL(url, currentUrl).href;
-            if (this.isTargetDomain(absoluteUrl)) {
-              const localPath = this.getLocalPath(absoluteUrl);
-              if (localPath) {
-                const currentLocalPath = this.getLocalPath(currentUrl);
-                const currentDir = dirname(currentLocalPath);
-                const relativePath = currentDir === '.' ? localPath : relative(currentDir, localPath);
-                return descriptor ? `${relativePath.replace(/\\/g, '/')} ${descriptor}` : relativePath.replace(/\\/g, '/');
-              }
+            const resolved = this.resolveHttpUrl(url, currentUrl);
+            if (!resolved) {
+              return entry;
+            }
+
+            const localPath = this.getAssetLocalPath(resolved.absoluteUrl);
+            if (localPath) {
+              const relativePath = this.getRelativePath(currentUrl, localPath);
+              return descriptor ? `${relativePath} ${descriptor}` : relativePath;
             }
             return entry;
           } catch {
@@ -248,6 +323,19 @@ class StaticSiteArchiver {
         console.log(`  Saved: ${localPath}`);
       }
 
+      // Download asset hrefs (e.g., icons, external assets)
+      const assetHrefUrls = await page.evaluate(() => {
+        const linkElements = Array.from(document.querySelectorAll('link[href]:not([rel="stylesheet"])'));
+        const downloadableAnchors = Array.from(document.querySelectorAll('a[href][download]'));
+        const elements = [...linkElements, ...downloadableAnchors];
+        return elements.map(el => ({ href: el.href, tag: el.tagName }));
+      });
+
+      for (const asset of assetHrefUrls) {
+        const tag = asset.tag.toLowerCase();
+        await this.downloadHttpAsset(asset.href, url, { logLabel: `${tag} href`, requireAssetExtension: true });
+      }
+
       // Download CSS files
       const cssUrls = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
@@ -255,12 +343,7 @@ class StaticSiteArchiver {
       });
 
       for (const cssUrl of cssUrls) {
-        if (this.isTargetDomain(cssUrl)) {
-          const localPath = this.getLocalPath(cssUrl);
-          if (localPath) {
-            await this.downloadAsset(cssUrl, localPath);
-          }
-        }
+        await this.downloadHttpAsset(cssUrl, url, { logLabel: 'stylesheet' });
       }
 
       // Download JS files
@@ -270,12 +353,7 @@ class StaticSiteArchiver {
       });
 
       for (const jsUrl of jsUrls) {
-        if (this.isTargetDomain(jsUrl)) {
-          const localPath = this.getLocalPath(jsUrl);
-          if (localPath) {
-            await this.downloadAsset(jsUrl, localPath);
-          }
-        }
+        await this.downloadHttpAsset(jsUrl, url, { logLabel: 'script' });
       }
 
       // Download images
@@ -285,12 +363,7 @@ class StaticSiteArchiver {
       });
 
       for (const imgUrl of imageUrls) {
-        if (this.isTargetDomain(imgUrl)) {
-          const localPath = this.getLocalPath(imgUrl);
-          if (localPath) {
-            await this.downloadAsset(imgUrl, localPath);
-          }
-        }
+        await this.downloadHttpAsset(imgUrl, url, { logLabel: 'image' });
       }
 
       // Download srcset images
@@ -310,17 +383,7 @@ class StaticSiteArchiver {
       });
 
       for (const srcsetUrl of srcsetUrls) {
-        try {
-          const absoluteUrl = new URL(srcsetUrl, url).href;
-          if (this.isTargetDomain(absoluteUrl)) {
-            const localPath = this.getLocalPath(absoluteUrl);
-            if (localPath) {
-              await this.downloadAsset(absoluteUrl, localPath);
-            }
-          }
-        } catch (error) {
-          // Ignore invalid URLs
-        }
+        await this.downloadHttpAsset(srcsetUrl, url, { logLabel: 'srcset image' });
       }
 
       // Download fonts
@@ -330,12 +393,7 @@ class StaticSiteArchiver {
       });
 
       for (const fontUrl of fontUrls) {
-        if (this.isTargetDomain(fontUrl)) {
-          const localPath = this.getLocalPath(fontUrl);
-          if (localPath) {
-            await this.downloadAsset(fontUrl, localPath);
-          }
-        }
+        await this.downloadHttpAsset(fontUrl, url, { logLabel: 'font' });
       }
 
     } catch (error) {
