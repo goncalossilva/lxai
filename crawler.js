@@ -241,6 +241,26 @@ class StaticSiteArchiver {
       }
     });
 
+    // Rewrite poster attributes for videos
+    const posterRegex = /poster=["']([^"']+)["']/g;
+    rewritten = rewritten.replace(posterRegex, (match, url) => {
+      try {
+        const resolved = this.resolveHttpUrl(url, currentUrl);
+        if (!resolved) {
+          return match;
+        }
+
+        const localPath = this.getAssetLocalPath(resolved.absoluteUrl);
+        if (localPath) {
+          const relativePath = this.getRelativePath(currentUrl, localPath);
+          return `poster="${relativePath}"`;
+        }
+        return match;
+      } catch {
+        return match;
+      }
+    });
+
     // Rewrite srcset attributes for responsive images
     const srcsetRegex = /srcset=["']([^"']+)["']/g;
     rewritten = rewritten.replace(srcsetRegex, (match, srcset) => {
@@ -290,7 +310,7 @@ class StaticSiteArchiver {
     try {
       // Navigate and wait for page to be fully loaded
       await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-      
+
       // Wait a bit more for any lazy-loaded content
       await page.waitForTimeout(2000);
 
@@ -394,6 +414,27 @@ class StaticSiteArchiver {
 
       for (const fontUrl of fontUrls) {
         await this.downloadHttpAsset(fontUrl, url, { logLabel: 'font' });
+      }
+
+      // Download video sources and posters
+      const videoData = await page.evaluate(() => {
+        const videos = Array.from(document.querySelectorAll('video'));
+        const sources = Array.from(document.querySelectorAll('video source[src]'));
+        return {
+          srcs: [
+            ...videos.filter(v => v.src).map(v => v.src),
+            ...sources.map(s => s.src)
+          ],
+          posters: videos.filter(v => v.poster).map(v => v.poster)
+        };
+      });
+
+      for (const videoUrl of videoData.srcs) {
+        await this.downloadHttpAsset(videoUrl, url, { logLabel: 'video' });
+      }
+
+      for (const posterUrl of videoData.posters) {
+        await this.downloadHttpAsset(posterUrl, url, { logLabel: 'video poster' });
       }
 
     } catch (error) {
