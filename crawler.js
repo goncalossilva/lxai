@@ -311,7 +311,22 @@ class StaticSiteArchiver {
       // Navigate and wait for page to be fully loaded
       await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 
-      // Wait a bit more for any lazy-loaded content
+      // Scroll through the page to trigger lazy-loaded content
+      await page.evaluate(async () => {
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const scrollHeight = document.body.scrollHeight;
+        const viewportHeight = window.innerHeight;
+
+        // Scroll down in increments
+        for (let y = 0; y < scrollHeight; y += viewportHeight) {
+          window.scrollTo(0, y);
+          await delay(200);
+        }
+        // Scroll back to top
+        window.scrollTo(0, 0);
+      });
+
+      // Wait for any lazy-loaded content to finish loading
       await page.waitForTimeout(2000);
 
       // Get all links on the page
