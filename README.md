@@ -1,47 +1,27 @@
 # lxai
-https://lisbonai.xyz/ static site archive
 
-## Overview
+This repository contains the editable Lisbon AI website at the repository root and the scripts used to publish it.
 
-This repository contains a Playwright-based web crawler that archives the lisbonai.xyz website as a static HTML site. The crawler:
+## Repository layout
 
-- Renders JavaScript-heavy pages using Chromium
-- Crawls only the exact lisbonai.xyz domain (no subdomains)
-- Keeps external and subdomain links external
-- Downloads all assets (CSS, JS, images, fonts)
-- Rewrites internal links to local paths
-- Outputs a deployable static site
+- `/` — website source and the version served at `https://lisbonai.xyz/`
+- `/2025/` — frozen 2025 site snapshot served at `https://lisbonai.xyz/2025/`
+- `/scripts/` — build and deployment scripts
 
-## Usage
+## Hard rule
 
-### Local Development
+Do not change anything under `/2025/`.
 
-1. Install dependencies:
+## Local workflow
+
+Edit the website directly in the repository root.
+
 ```bash
-npm install
+npm run build:pages
 ```
 
-2. Install Playwright browsers:
-```bash
-npx playwright install chromium
-```
+That builds the GitHub Pages payload into `dist/`.
 
-3. Run the archiver:
-```bash
-npm run archive
-```
+## Deployment
 
-The static site will be generated in the `output/` directory.
-
-### GitHub Actions
-
-The repository includes a GitHub Actions workflow that can be triggered manually to:
-1. Run the archiver
-2. Deploy the generated static site to the `gh-pages` branch
-
-To trigger the workflow:
-1. Go to the Actions tab in the repository
-2. Select "Archive lisbonai.xyz" workflow
-3. Click "Run workflow"
-
-The archived site will be available via GitHub Pages.
+Pushes to `main` deploy the built site to GitHub Pages. The deployment includes the site at `/` and the frozen `/2025/` snapshot.

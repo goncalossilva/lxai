@@ -1,14 +1,10 @@
 {
-  "name": "lxai-archiver",
+  "name": "lxai",
   "version": "1.0.0",
-  "description": "Static site archiver for lisbonai.xyz",
+  "description": "Lisbon AI website source and deployment tooling",
   "type": "module",
   "scripts": {
-    "archive": "node crawler.js",
-    "test": "node test-crawler.js"
-  },
-  "dependencies": {
-    "playwright": "^1.40.0"
+    "build:pages": "node scripts/build-pages.js"
   },
   "engines": {
     "node": ">=18"
