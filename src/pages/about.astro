@@ -3,6 +3,67 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Location from "../components/Location.astro";
+import {
+    aboutPhotos,
+    type AboutPhotoKind,
+    type AboutPhotoOrientation,
+} from "../data/aboutPhotos";
+
+type AboutPhotoSlotName = "hero" | "portrait" | "secondary" | "detail";
+
+type AboutPhotoSlot = {
+    name: AboutPhotoSlotName;
+    orientation: AboutPhotoOrientation;
+    kinds?: AboutPhotoKind[];
+};
+
+const withBaseUrl = (photo: (typeof aboutPhotos)[number]) => ({
+    ...photo,
+    src: `${import.meta.env.BASE_URL}${photo.src}`,
+});
+
+const aboutPhotoPool = aboutPhotos.map(withBaseUrl);
+
+const heroSlot: AboutPhotoSlot = {
+    name: "hero",
+    orientation: "horizontal",
+    kinds: ["context"],
+};
+const portraitSlot: AboutPhotoSlot = {
+    name: "portrait",
+    orientation: "vertical",
+};
+const secondarySlot: AboutPhotoSlot = {
+    name: "secondary",
+    orientation: "horizontal",
+    kinds: ["talk"],
+};
+const detailSlot: AboutPhotoSlot = {
+    name: "detail",
+    orientation: "horizontal",
+    kinds: ["community", "detail"],
+};
+
+const photoSlots = [heroSlot, portraitSlot, secondarySlot, detailSlot];
+
+const matchesPhotoSlot = (
+    photo: (typeof aboutPhotoPool)[number],
+    slot: AboutPhotoSlot,
+) =>
+    photo.orientation === slot.orientation &&
+    (!slot.kinds || slot.kinds.includes(photo.kind));
+
+const findFallbackPhoto = (slot: AboutPhotoSlot) =>
+    aboutPhotoPool.find((photo) => matchesPhotoSlot(photo, slot)) ??
+    aboutPhotoPool.find((photo) => photo.orientation === slot.orientation) ??
+    aboutPhotoPool[0];
+
+const fallbackPhotos = {
+    hero: findFallbackPhoto(heroSlot),
+    portrait: findFallbackPhoto(portraitSlot),
+    secondary: findFallbackPhoto(secondarySlot),
+    detail: findFallbackPhoto(detailSlot),
+};
 ---
 
 <Layout>
@@ -14,24 +75,115 @@ import Location from "../components/Location.astro";
             <div class="small-headline mb-4">/know-more</div>
             <h1 class="text-2xl mb-8">About Lisbon AI</h1>
 
-            <div class="grid md:grid-cols-2 gap-8">
-                <img
-                    src={`${import.meta.env.BASE_URL}images/event-anomaly.webp`}
-                    class="w-full h-auto rounded-2xl"
-                />
-                <img
-                    src={`${import.meta.env.BASE_URL}images/event-audience.webp`}
-                    class="w-full h-auto rounded-2xl"
-                />
-                <img
-                    src={`${import.meta.env.BASE_URL}images/event-group.webp`}
-                    class="w-full h-auto rounded-2xl"
-                />
-                <img
-                    src={`${import.meta.env.BASE_URL}images/event-speaker.webp`}
-                    class="w-full h-auto rounded-2xl"
-                />
+            <div class="grid gap-6 md:grid-cols-12 md:gap-8">
+                <figure
+                    class="aspect-[3/2] overflow-hidden rounded-2xl bg-white/[0.03] md:col-span-7"
+                >
+                    <img
+                        data-about-photo-slot="hero"
+                        src={fallbackPhotos.hero.src}
+                        alt={fallbackPhotos.hero.alt}
+                        class="h-full w-full object-cover transition-opacity duration-500 motion-reduce:transition-none"
+                        style={`object-position: ${fallbackPhotos.hero.position}`}
+                        decoding="async"
+                        fetchpriority="high"
+                    />
+                </figure>
+
+                <figure
+                    class="aspect-[4/5] max-h-[70vh] overflow-hidden rounded-2xl bg-white/[0.03] md:col-span-5 md:row-span-2 md:h-full md:max-h-none md:aspect-auto"
+                >
+                    <img
+                        data-about-photo-slot="portrait"
+                        src={fallbackPhotos.portrait.src}
+                        alt={fallbackPhotos.portrait.alt}
+                        class="h-full w-full object-cover transition-opacity duration-500 motion-reduce:transition-none"
+                        style={`object-position: ${fallbackPhotos.portrait.position}`}
+                        decoding="async"
+                    />
+                </figure>
+
+                <figure
+                    class="aspect-[3/2] overflow-hidden rounded-2xl bg-white/[0.03] md:col-span-4"
+                >
+                    <img
+                        data-about-photo-slot="secondary"
+                        src={fallbackPhotos.secondary.src}
+                        alt={fallbackPhotos.secondary.alt}
+                        class="h-full w-full object-cover transition-opacity duration-500 motion-reduce:transition-none"
+                        style={`object-position: ${fallbackPhotos.secondary.position}`}
+                        decoding="async"
+                        loading="lazy"
+                    />
+                </figure>
+
+                <figure
+                    class="aspect-[3/2] overflow-hidden rounded-2xl bg-white/[0.03] md:col-span-3 md:h-full md:aspect-auto"
+                >
+                    <img
+                        data-about-photo-slot="detail"
+                        src={fallbackPhotos.detail.src}
+                        alt={fallbackPhotos.detail.alt}
+                        class="h-full w-full object-cover transition-opacity duration-500 motion-reduce:transition-none"
+                        style={`object-position: ${fallbackPhotos.detail.position}`}
+                        decoding="async"
+                        loading="lazy"
+                    />
+                </figure>
             </div>
+
+            <script define:vars={{ aboutPhotoPool, photoSlots }}>
+                const selectedSources = new Set();
+
+                const matchesPhotoSlot = (photo, slot) =>
+                    photo.orientation === slot.orientation &&
+                    (!slot.kinds || slot.kinds.includes(photo.kind));
+
+                const availablePhotos = (slot, strict = true) =>
+                    aboutPhotoPool.filter(
+                        (photo) =>
+                            !selectedSources.has(photo.src) &&
+                            (strict
+                                ? matchesPhotoSlot(photo, slot)
+                                : photo.orientation === slot.orientation),
+                    );
+
+                const randomPhoto = (slot) => {
+                    const candidates = availablePhotos(slot);
+                    const fallbackCandidates = availablePhotos(slot, false);
+                    const pool =
+                        candidates.length > 0 ? candidates : fallbackCandidates;
+
+                    if (pool.length === 0) return null;
+
+                    const photo = pool[Math.floor(Math.random() * pool.length)];
+                    selectedSources.add(photo.src);
+                    return photo;
+                };
+
+                for (const slot of photoSlots) {
+                    const photo = randomPhoto(slot);
+                    const image = document.querySelector(
+                        `[data-about-photo-slot="${slot.name}"]`,
+                    );
+
+                    if (!photo || !image) continue;
+
+                    image.classList.add("opacity-0");
+                    image.addEventListener(
+                        "load",
+                        () => image.classList.remove("opacity-0"),
+                        { once: true },
+                    );
+                    image.src = photo.src;
+                    image.alt = photo.alt;
+                    image.style.objectPosition = photo.position;
+
+                    if (image.complete) {
+                        image.classList.remove("opacity-0");
+                    }
+                }
+            </script>
         </div>
     </section>
 

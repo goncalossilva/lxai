@@ -1,0 +1,472 @@
+export type AboutPhotoOrientation = "horizontal" | "vertical";
+export type AboutPhotoKind = "context" | "talk" | "community" | "detail";
+
+export type AboutPhoto = {
+  src: string;
+  orientation: AboutPhotoOrientation;
+  kind: AboutPhotoKind;
+  alt: string;
+  position: string;
+};
+
+const orientationSuffix: Record<AboutPhotoOrientation, string> = {
+  horizontal: "h",
+  vertical: "v",
+};
+
+const photo = (
+  orientation: AboutPhotoOrientation,
+  kind: AboutPhotoKind,
+  filename: string,
+  alt: string,
+  position?: string,
+): AboutPhoto => ({
+  src: `images/about/${filename}.${orientationSuffix[orientation]}.webp`,
+  orientation,
+  kind,
+  alt,
+  position: position ?? (orientation === "vertical" ? "50% 40%" : "50% 50%"),
+});
+
+export const aboutPhotos: AboutPhoto[] = [
+  photo(
+    "horizontal",
+    "talk",
+    "001",
+    "Speaker presenting to a seated Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "002",
+    "Speaker on stage at Lisbon AI with sponsor logos behind them",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "003",
+    "Lisbon AI team members preparing coffee and equipment",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "004",
+    "Lisbon AI audience seated before a talk",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "005",
+    "Attendees watching a Lisbon AI session from the audience",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "006",
+    "Speaker presenting an AI agents talk to the Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "007",
+    "Attendees working and talking in a lounge at Lisbon AI",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "008",
+    "Small group of attendees talking around a table",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "010",
+    "Attendees gathered around a tabletop food and coffee setup",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "011",
+    "Speaker at the Lisbon AI podium beside a projected portrait",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "013",
+    "Speaker presenting about smaller language models on stage",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "014",
+    "Speaker presenting a diagram to the Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "015",
+    "Close view of the Lisbon AI audience during a session",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "016",
+    "Speaker presenting colorful slides to a full room",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "017",
+    "Speaker presenting with multiple screens behind her",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "018",
+    "Attendees chatting outdoors during a Lisbon AI break",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "019",
+    "Group of attendees networking outside the venue",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "020",
+    "Audience member speaking during a Lisbon AI session",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "022",
+    "Speaker presenting a web interface on the main Lisbon AI screen",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "024",
+    "Close-up of an AI demo interface projected during a talk",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "027",
+    "Speaker presenting software on a large screen",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "029",
+    "Speaker standing beside a dark projected slide",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "031",
+    "Lisbon AI venue exterior with attendees by the entrance",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "032",
+    "Quiet view of the Lisbon AI stage and riverside venue",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "033",
+    "Riverside venue facade reflected in the water",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "034",
+    "Full Lisbon AI audience seated during a session",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "035",
+    "Attendees using laptops while watching a talk",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "036",
+    "Speaker presenting slides to the Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "037",
+    "Attendees checking in at the Lisbon AI registration desk",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "038",
+    "Attendees talking near the registration area",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "039",
+    "Attendees serving food during a Lisbon AI break",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "041",
+    "Two attendees talking on an upper balcony of the venue",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "042",
+    "Silhouetted attendees against a projected screen",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "044",
+    "Attendees gathered around a table during a break",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "045",
+    "Small group of attendees talking at an outdoor table",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "046",
+    "Attendees in conversation around a cafe table",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "047",
+    "Group photo of Lisbon AI attendees outside the venue",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "050",
+    "Attendees walking through the venue entrance area",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "051",
+    "Speaker presenting in front of colorful sponsor logos",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "052",
+    "Speaker presenting an anomaly detection demo to the audience",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "053",
+    "Speaker introduction slide shown to the Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "057",
+    "Crowd of Lisbon AI attendees outside the venue",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "060",
+    "Line of attendees outside the Lisbon AI venue",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "061",
+    "Attendees wearing badges talking outdoors",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "062",
+    "Attendees looking at a robotics demo during Lisbon AI",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "063",
+    "Attendees talking inside the venue near large windows",
+  ),
+  photo(
+    "horizontal",
+    "community",
+    "065",
+    "Attendees gathering near the venue during a break",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "066",
+    "Speaker holding a microphone beside a projected slide",
+  ),
+  photo(
+    "horizontal",
+    "talk",
+    "068",
+    "Speaker addressing a seated Lisbon AI audience",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "069",
+    "Rows of attendees watching a Lisbon AI talk",
+  ),
+  photo(
+    "horizontal",
+    "context",
+    "073",
+    "Attendees walking on the lawn outside the Lisbon AI venue",
+  ),
+  photo(
+    "horizontal",
+    "detail",
+    "074",
+    "Attendees visiting a sponsor demo booth",
+  ),
+  photo("horizontal", "context", "075", "Entrance to the Lisbon AI venue"),
+  photo(
+    "vertical",
+    "community",
+    "009",
+    "Attendees walking and talking inside the Lisbon AI venue",
+  ),
+  photo(
+    "vertical",
+    "detail",
+    "012",
+    "Audience member recording a Lisbon AI talk on a phone",
+  ),
+  photo(
+    "vertical",
+    "talk",
+    "021",
+    "Speaker at a podium presenting beside a large screen",
+  ),
+  photo(
+    "vertical",
+    "talk",
+    "023",
+    "Speaker presenting from the Lisbon AI podium",
+  ),
+  photo(
+    "vertical",
+    "detail",
+    "025",
+    "Attendee taking handwritten notes during a Lisbon AI session",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "026",
+    "Audience member asking a question with a microphone",
+  ),
+  photo("vertical", "talk", "028", "Speaker presenting code on a large screen"),
+  photo(
+    "vertical",
+    "context",
+    "030",
+    "Wide vertical view of the Lisbon AI audience",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "040",
+    "Attendees gathered around tables in a workshop room",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "043",
+    "Small group seated for a Lisbon AI discussion",
+  ),
+  photo(
+    "vertical",
+    "context",
+    "048",
+    "Overhead view of attendees walking outside the venue",
+  ),
+  photo(
+    "vertical",
+    "context",
+    "049",
+    "Attendees walking along the green venue grounds",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "054",
+    "Group of attendees chatting indoors between sessions",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "055",
+    "Two attendees talking while walking through the venue",
+  ),
+  photo(
+    "vertical",
+    "context",
+    "056",
+    "Crowd gathered outside the Lisbon AI venue",
+  ),
+  photo(
+    "vertical",
+    "detail",
+    "058",
+    "Attendees and camera crew near the outdoor stairs",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "059",
+    "Two attendees talking on the lawn outside the venue",
+  ),
+  photo(
+    "vertical",
+    "context",
+    "064",
+    "Attendees walking along the tree-lined venue path",
+  ),
+  photo(
+    "vertical",
+    "detail",
+    "067",
+    "Attendees using laptops during a Lisbon AI session",
+  ),
+  photo(
+    "vertical",
+    "detail",
+    "070",
+    "Close-up of hands typing on a laptop during Lisbon AI",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "071",
+    "Attendees talking in the audience between sessions",
+  ),
+  photo(
+    "vertical",
+    "community",
+    "072",
+    "Seated attendee asking a question during a Lisbon AI talk",
+  ),
+];
