@@ -5,8 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://lisbon-ai.github.io',
-  base: '/website/',
+  site: 'https://lisbonai.xyz',
   vite: {
     plugins: [tailwindcss()]
   }
