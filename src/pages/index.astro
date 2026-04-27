@@ -1,0 +1,122 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Footer from "../components/Footer.astro";
+import Location from "../components/Location.astro";
+
+import { format } from "../data/format";
+import { faqs } from "../data/faqs";
+
+const brailleFrames = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"];
+const randomBraille = () =>
+    brailleFrames[Math.floor(Math.random() * brailleFrames.length)];
+---
+
+<Layout>
+    <Header />
+    <Hero />
+
+    <!-- What to expect -->
+    <section class="border-t border-white/10">
+        <div class="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-12">
+            <div class="md:col-span-4">
+                <div class="small-headline">/what-to-expect</div>
+            </div>
+            <div
+                class="space-y-6 text-xl leading-relaxed md:col-span-8 md:text-2xl"
+            >
+                <p>AI isn't the next big thing - it is the big thing.</p>
+                <p>
+                    Lisbon AI is the annual summit for people shipping AI in the
+                    real world. No hype decks, no rubber-chicken dinners &mdash;
+                    just code, talks, and hallway hacking.
+                </p>
+                <p>
+                    Join top labs, founding teams, and engineers deploying
+                    models in production, to chat about where we are now and
+                    what's next.
+                </p>
+                <p>Bring your laptop.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Format -->
+    <section id="format" class="border-t border-white/10">
+        <div class="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-12">
+            <div class="md:col-span-4">
+                <div class="small-headline">/format</div>
+            </div>
+            <ul class="md:col-span-8">
+                {
+                    format.map((item) => (
+                        <li class="flex items-baseline justify-between border-b border-white/10 py-5 text-xl md:text-2xl">
+                            <span>{item}</span>
+                            <span class="font-mono text-xs text-faint">
+                                &rarr;
+                            </span>
+                        </li>
+                    ))
+                }
+            </ul>
+        </div>
+    </section>
+
+    <!-- Location -->
+    <Location />
+
+    <!-- FAQ -->
+    <section class="border-t border-white/10">
+        <div class="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-12">
+            <div class="md:col-span-4">
+                <div class="small-headline">/faq</div>
+            </div>
+            <div class="md:col-span-8">
+                {
+                    faqs.map((faq) => (
+                        <details class="group border-b border-white/10 py-5">
+                            <summary class="flex cursor-pointer list-none items-center justify-between text-base md:text-2xl">
+                                <span>
+                                    <span class="mr-2 font-mono text-base text-muted md:text-lg">
+                                        {randomBraille()}
+                                    </span>
+                                    {faq.q}
+                                </span>
+                                <span class="font-mono text-xs text-faint transition group-open:rotate-45">
+                                    +
+                                </span>
+                            </summary>
+                            <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+                                {faq.a}
+                            </p>
+                        </details>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Tickets CTA -->
+    <section id="tickets" class="border-t border-white/10">
+        <div class="mx-auto grid max-w-6xl gap-12 px-6 py-24 md:grid-cols-12">
+            <div class="md:col-span-4">
+                <div class="small-headline">/tickets</div>
+            </div>
+            <div class="md:col-span-8">
+                <p class="max-w-2xl text-2xl leading-snug md:text-3xl">
+                    We're slowly starting to roll out to tickets to the 2026
+                    edition of Lisbon AI. Join the waiting list below.
+                </p>
+                <a
+                    href="https://tickets.lisbonai.xyz/registration"
+                    class="mt-8 inline-block rounded-full bg-cream-warm px-6 py-3 text-ink hover:bg-cream"
+                >
+                    Get tickets &rarr;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <Footer />
+</Layout>

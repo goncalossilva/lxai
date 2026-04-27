@@ -1,12 +1,19 @@
 {
-  "name": "lxai",
-  "version": "1.0.0",
-  "description": "Lisbon AI website source and deployment tooling",
+  "name": "astro",
   "type": "module",
-  "scripts": {
-    "build:pages": "node scripts/build-pages.js"
-  },
+  "version": "0.0.1",
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "astro": "^6.1.9",
+    "tailwindcss": "^4.2.4"
   }
 }

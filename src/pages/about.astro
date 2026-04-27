@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Location from "../components/Location.astro";
+---
+
+<Layout>
+    <Header />
+
+    <!-- Photos -->
+    <section class="border-t border-white/10">
+        <div class="mx-auto max-w-6xl py-16 px-8 md:px-0">
+            <div class="small-headline mb-4">/know-more</div>
+            <h1 class="text-2xl mb-8">About Lisbon AI</h1>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <img
+                    src={`${import.meta.env.BASE_URL}images/event-anomaly.webp`}
+                    class="w-full h-auto rounded-2xl"
+                />
+                <img
+                    src={`${import.meta.env.BASE_URL}images/event-audience.webp`}
+                    class="w-full h-auto rounded-2xl"
+                />
+                <img
+                    src={`${import.meta.env.BASE_URL}images/event-group.webp`}
+                    class="w-full h-auto rounded-2xl"
+                />
+                <img
+                    src={`${import.meta.env.BASE_URL}images/event-speaker.webp`}
+                    class="w-full h-auto rounded-2xl"
+                />
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-white/10">
+        <div class="mx-auto max-w-6xl py-16 px-8 md:px-0">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="small-headline mb-4">/what-to-expect</div>
+                    <p class="text-xl mb-8">
+                        Lisbon AI started as a not‑so‑quiet group chat of
+                        hackers reminiscing about LXJS and wondering why there
+                        wasn’t a European, builder‑first AI gathering. We fixed
+                        that in 2025, and we're back for more in 2026.
+                    </p>
+                </div>
+                <div class="md:px-12">
+                    <ul class="text-xl">
+                        <li class="mb-4">
+                            Community-run<br />
+                            <span class="text-muted"
+                                >Organized by people who ship open-source for a
+                                living. Volunteer based.</span
+                            >
+                        </li>
+                        <li class="mb-4 border-t border-white/10 pt-4">
+                            Single‑track talks, multi‑track fun<br />
+                            <span class="text-muted"
+                                >You never miss a talk, but you choose your own
+                                dinners, workshops, and hackathon projects.</span
+                            >
+                        </li>
+                        <li class="mb-4 border-t border-white/10 pt-4">
+                            Open-source<br />
+                            <span class="text-muted"
+                                >Every speaker presents the code. Every talk is
+                                live-streamed.</span
+                            >
+                        </li>
+                        <li class="mb-4 border-t border-white/10 pt-4">
+                            Ethical by design<br />
+                            <span class="text-muted"
+                                >Code of conduct, diverse curation, and
+                                scholarships baked in</span
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <Location />
+
+    <Footer />
+</Layout>

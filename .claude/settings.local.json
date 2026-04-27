@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL https://lisbonai.xyz/index.html -o /tmp/lisbonai-index.html)",
+      "Read(//tmp/**)",
+      "Bash(file /Users/fred/code/lisbonai/astro/public/images/*.webp)",
+      "Bash(curl -s http://localhost:4323/about)"
+    ]
+  }
+}

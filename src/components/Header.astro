@@ -1,0 +1,41 @@
+<header
+    class="mx-auto flex items-center justify-between px-8 py-5 border-b border-white/10"
+>
+    <a
+        href={import.meta.env.BASE_URL}
+        class="flex items-center gap-2 font-mono text-xs uppercase"
+    >
+        <span class="braille-spinner inline-block text-muted" aria-hidden="true"
+            >⣾</span
+        >
+        Lisbon AI
+        <span class="text-muted">/2026</span>
+    </a>
+    <div class="flex items-center gap-6">
+        <a
+            href={`${import.meta.env.BASE_URL}about`}
+            class="text-muted hover:text-white text-sm hidden md:inline"
+            >About</a
+        >
+        <a
+            href={`${import.meta.env.BASE_URL}conduct`}
+            class="text-muted hover:text-white text-sm hidden md:inline"
+            >Conduct</a
+        >
+        <a href="https://tickets.lisbonai.xyz/registration" class="tickets-cta">
+            Tickets &rarr;
+        </a>
+    </div>
+</header>
+
+<script>
+    const frames = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"];
+    const el = document.querySelector<HTMLElement>(".braille-spinner");
+    if (el) {
+        let i = 0;
+        setInterval(() => {
+            i = (i + 1) % frames.length;
+            el.textContent = frames[i];
+        }, 120);
+    }
+</script>

@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono:
+        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-display: "Oswald", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+    --color-ink: #040429;
+    --color-cream: #fffefa;
+    --color-cream-warm: #fcffef;
+    --color-muted: #8989b0;
+    --color-faint: #666686;
+    --color-accent: #0099ff;
+}
+
+.small-headline {
+    @apply font-mono text-xs uppercase text-muted;
+}
+
+.big-headline {
+    @apply font-display text-8xl font-bold uppercase tracking-tight;
+}
+
+.tickets-cta {
+    @apply rounded-full bg-cream-warm px-4 py-2 text-sm text-ink hover:bg-cream;
+}
