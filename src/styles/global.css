@@ -25,3 +25,7 @@
 .tickets-cta {
     @apply rounded-full bg-cream-warm px-4 py-2 text-sm text-ink hover:bg-cream;
 }
+
+nav a {
+    @apply text-sm text-muted hover:text-white;
+}
