@@ -16,28 +16,30 @@
                     train, taxi bus or rideshare.
                 </p>
             </div>
-            <div class="md:pl-8">
+            <div class="md:pl-8" data-venue-grid data-base={import.meta.env.BASE_URL}>
                 <div>
-                    <img
-                        src={`${import.meta.env.BASE_URL}images/venue/1.jpg`}
-                        class="w-full rounded-lg"
-                    />
+                    <img data-venue-main class="w-full rounded-lg" />
                 </div>
                 <div class="grid grid-cols-3 gap-4 mt-4">
-                    <img
-                        src={`${import.meta.env.BASE_URL}images/venue/2.jpg`}
-                        class="w-full rounded-lg"
-                    />
-                    <img
-                        src={`${import.meta.env.BASE_URL}images/venue/3.jpg`}
-                        class="w-full rounded-lg"
-                    />
-                    <img
-                        src={`${import.meta.env.BASE_URL}images/venue/4.jpg`}
-                        class="w-full rounded-lg"
-                    />
+                    <img data-venue-thumb class="w-full rounded-lg" />
+                    <img data-venue-thumb class="w-full rounded-lg" />
+                    <img data-venue-thumb class="w-full rounded-lg" />
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script is:inline>
+    (() => {
+        const grid = document.querySelector("[data-venue-grid]");
+        if (!grid) return;
+        const base = grid.dataset.base;
+        const order = [1, 2, 3, 4].sort(() => Math.random() - 0.5);
+        grid.querySelector("[data-venue-main]").src =
+            `${base}images/venue/${order[0]}.jpg`;
+        grid.querySelectorAll("[data-venue-thumb]").forEach((img, i) => {
+            img.src = `${base}images/venue/${order[i + 1]}.jpg`;
+        });
+    })();
+</script>
